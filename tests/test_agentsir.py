@@ -7,12 +7,13 @@ import numba as nb
 import numpy as np
 import polars as pl
 from tqdm import tqdm
+from scipy.integrate import odeint
 
 from idmlaser.community.homogeneous_abc import HomogeneousABC as abc
 
 SEED = np.uint32(20231205)
-POP_SIZE = np.uint32(1_000_000_000)
-INIT_INF = np.uint32(10)
+POP_SIZE = np.uint32(1_000_000)
+INIT_INF = np.uint32(100)
 
 _prng = np.random.default_rng(seed=SEED)
 
@@ -138,6 +139,33 @@ def test_sir():
 
     return
 
+def test_compartmental():
+
+    # get recovery rate, GAMMA, from R_NAUGHT and BETA
+    GAMMA = BETA / R_NAUGHT
+    print(GAMMA, BETA, R_NAUGHT)
+
+    def model(y, t, gamma):
+        """SIR model"""
+        S, I, R = y
+        dSdt = -BETA * S * I
+        dIdt = BETA * S * I - gamma * I
+        dRdt = gamma * I
+        dydt = [dSdt, dIdt, dRdt]
+        return dydt
+    
+    # initial conditions
+    y0 = [(POP_SIZE - INIT_INF)/POP_SIZE, INIT_INF/POP_SIZE, 0]
+    # time points
+    t = np.linspace(0, TIMESTEPS, 100*(TIMESTEPS+1))
+    print('time steps:', t[:5])
+    # Integrate the SIR equations
+    results = odeint(model, y0, t, args=(GAMMA,)) * POP_SIZE
+
+    df = pl.DataFrame(data=np.column_stack((t[:,np.newaxis], results)), 
+                        schema=['timestep', 'susceptible', 'infected', 'recovered'])
+    df.write_csv("c_sir.csv")
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -159,3 +187,23 @@ if __name__ == "__main__":
     BETA = np.float32(R_NAUGHT / MEAN_INF)
 
     test_sir()
+
+    # compartmental model
+    test_compartmental()
+
+   # plot results
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, sharey=True)
+    # plt susceptible and infecteds
+    df = pl.read_csv("sir.csv")
+    axes[0].plot(df["timestep"], df[["susceptible", "infected", "recovered"]])
+    df_c = pl.read_csv("c_sir.csv")
+    print(df_c.head())
+    print(df_c.tail())
+    axes[1].plot(df_c["timestep"], df_c[["susceptible", "infected", "recovered"]], '--')
+    for ax in axes:
+        ax.set_xlabel('Time')
+        ax.set_ylabel('N')
+        ax.set_ylim(0, None)
+    plt.savefig('sir.png')
+
