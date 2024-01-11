@@ -16,7 +16,7 @@ from idmlaser.community.homogeneous_abc import HomogeneousABC as abc
 
 SEED = np.uint32(20231205)
 POP_SIZE = np.uint32(1_000_000)
-INIT_INF = np.uint32(10)
+INIT_INF = np.uint32(100)
 
 _prng = np.random.default_rng(seed=SEED)
 
