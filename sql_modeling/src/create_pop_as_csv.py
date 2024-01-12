@@ -1,3 +1,7 @@
+"""
+Creates input pop file for e.g., tlc.py using the sir_sql.py model.
+"""
+
 import sqlite3
 import csv
 import settings
