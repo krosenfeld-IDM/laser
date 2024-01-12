@@ -6,13 +6,13 @@ from functools import partial
 import numba
 import pdb
 
-import settings
+# import settings
 import report
 
 # Globals! (not really)
 #base_infectivity = 0.000002
 #settings.base_infectivity = 0.00001
-settings.base_infectivity = 0.0001
+# settings.base_infectivity = 0.0001
 
 import ctypes
 # Load the shared library
@@ -103,6 +103,8 @@ def load( pop_file ):
     return columns
 
 def initialize_database():
+    print("Initializing database...")
+    print(settings)
     return load( settings.pop_file )
     
 def collect_report( data ):

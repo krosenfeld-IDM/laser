@@ -4,12 +4,15 @@ from sparklines import sparklines
 import settings
 
 write_report = True
+global csvfile
 
 def init():
     # Create a CSV file for reporting
+    global csvfile
     csvfile = open( settings.report_filename, 'w', newline='') 
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(['Timestep', 'Node', 'Susceptible', 'Infected', 'Recovered'])
+    # Return the csvwriter (the file must be close using the close() function below)
     return csvwriter
 
 def write_timestep_report( csvwriter, timestep, infected_counts, susceptible_counts, recovered_counts ):
@@ -18,8 +21,8 @@ def write_timestep_report( csvwriter, timestep, infected_counts, susceptible_cou
     total = {key: susceptible_counts.get(key, 0) + infected_counts.get(key, 0) + recovered_counts.get(key, 0) for key in susceptible_counts.keys()}
     totals = np.array([total[key] for key in sorted(total.keys(), reverse=True)])
     prev = infecteds/totals
-    print( f"T={timestep}" )
-    print( list( sparklines( prev ) ) )
+    # print( f"T={timestep}" )
+    # print( list( sparklines( prev ) ) )
     # Write the counts to the CSV file
     #print( f"T={timestep},\nS={susceptible_counts},\nI={infected_counts},\nR={recovered_counts}" )
     if write_report:
@@ -32,3 +35,7 @@ def write_timestep_report( csvwriter, timestep, infected_counts, susceptible_cou
                 ]
             )
 
+def close():
+    # Close the CSV file
+    global csvfile
+    csvfile.close()
