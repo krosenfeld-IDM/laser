@@ -3,4 +3,6 @@ matplotlib
 polars
 sparklines
 numba
+tqdm
+icecream
 
