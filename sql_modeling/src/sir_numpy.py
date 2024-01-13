@@ -269,11 +269,11 @@ def handle_transmission_by_node( data, new_infections, node=0 ):
         # # Draw infections
         # selected_indices = np.random.choice(eligible_agents_indices, size=min(new_infections, len(eligible_agents_indices)), replace=False)
         
-        # New boolean mask for those in the node who are not currently infected or immune
-        subquery_condition = np.logical_and(~data['infected'][selected_indices], ~data['immunity'][selected_indices])
+        # # New boolean mask for those in the node who are not currently infected or immune
+        # subquery_condition = np.logical_and(~data['infected'][selected_indices], ~data['immunity'][selected_indices])
 
-        # And downselect using this subquery condition
-        selected_indices = selected_indices[subquery_condition]
+        # # And downselect using this subquery condition
+        # selected_indices = selected_indices[subquery_condition]
 
         # print( f"We are doing transmission to {new_infections} in node {node}." )
         # Create a boolean mask based on the conditions in the subquery
