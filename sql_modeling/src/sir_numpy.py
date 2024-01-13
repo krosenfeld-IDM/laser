@@ -13,7 +13,7 @@ import report
 # Globals! (not really)
 #base_infectivity = 0.000002
 # settings.base_infectivity = 0.00001
-# settings.base_infectivity = 0.0001
+settings.base_infectivity = 0.0001
 
 def update_settings(new_settings):
     for k,v in new_settings.__dict__.items():
@@ -252,8 +252,8 @@ def calculate_new_infections( data, inf, sus ):
                 new_infections
             )
         return new_infections 
-    # return calculate_new_infections_np( data, inf, sus )
-    return calculate_new_infections_c( data, inf, sus )
+    return calculate_new_infections_np( data, inf, sus )
+    # return calculate_new_infections_c( data, inf, sus )
 
 def handle_transmission_by_node( data, new_infections, node=0 ):
     # Step 5: Update the infected flag for NEW infectees
