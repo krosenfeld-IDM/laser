@@ -1,6 +1,8 @@
 README
 ======
 
+Toy models using Julia. Right now the parameters and method are meant to follow Chistopher Lorton's `well-mixed-abc` branch.
+
 # Getting started
 
 Scripts are in the form `example_XXX.jl` and can be run:
@@ -12,6 +14,11 @@ julia> include("example_sir.jl")
 ``````
 2. Or from the command line:
 ``` julia --project=. example_sir.jl```
+
+Right now the models only take R0 and popsize as arguments. Everything else is hard coded in the repository.
+
+To use multiple threads you can call initialize julia with the `-threads N` flag:
+``` julia --project=. --threads 4 example_sir.jl```
 
 
 # Installing Julia
