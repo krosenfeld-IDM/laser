@@ -89,8 +89,8 @@ def initialize_database( conn=None ):
     # Seed exactly 100 people to be infected in the first timestep
     # uniform distribution draws seem a bit clunky in SQLite. Probably better to use %
     cursor.execute( 'UPDATE agents SET infected = 1, infection_timer=CAST( 4+10*(RANDOM() + 9223372036854775808)/18446744073709551616 AS INTEGER ), incubation_timer=3 WHERE id IN (SELECT id FROM agents WHERE node=:big_node ORDER BY RANDOM() LIMIT 100)', { 'big_node': num_nodes-1 } )
-    # Make everyone over some age perman-immune
-    cursor.execute( "UPDATE agents SET immunity = 1, immunity_timer=-1 WHERE infected=0 AND age > 5*365" )
+    # # Make everyone over some age perman-immune
+    # cursor.execute( "UPDATE agents SET immunity = 1, immunity_timer=-1 WHERE infected=0 AND age > 5*365" )
 
     conn.commit()
 

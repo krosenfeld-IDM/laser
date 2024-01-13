@@ -105,7 +105,7 @@ def load( pop_file ):
         condition = np.logical_and(~columns['infected'], columns['age']>15)
         columns['immunity'][condition] = 1
         columns['immunity_timer'][condition] = -1
-    eula()
+    # eula()
     return columns
 
 def initialize_database():
