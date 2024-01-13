@@ -40,6 +40,7 @@ xlabel!("log10(N)")
 ylabel!("log10(seconds)")
 savefig("benchmark_num_agents_time.png")
 
+# make figure for memory
 plot(ns, log10.(results["SIR"][2]), seriestype=:scatter, label="SIR")
 plot!(ns, log10.(results["SEIR"][2]), seriestype=:scatter, label="SEIR")
 xlabel!("log10(N)")
