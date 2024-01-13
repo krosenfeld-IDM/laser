@@ -221,7 +221,7 @@ def calculate_new_infections( data, inf, sus ):
         node_counts_incubators = np.zeros(len(inf))
         node_counts_incubators = np.bincount( data['node'][data['incubation_timer']>=1] )
         if len( node_counts_incubators ) == 0:
-            print( "node_counts_incubators came back size 0." ) # this can be OK at the beginning.
+            # print( "node_counts_incubators came back size 0." ) # this can be OK at the beginning.
             node_counts_incubators = np.zeros( settings.num_nodes )
         elif len( node_counts_incubators ) != len( inf ):
             #print( "node_counts_incubators came back missing a node." )
