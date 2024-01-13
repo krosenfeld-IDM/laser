@@ -1,3 +1,4 @@
+from tqdm import tqdm
 # Import a model
 #import sir_sql as model
 #import sir_sql_polars as model
@@ -13,7 +14,7 @@ def run_simulation(ctx, csvwriter, num_timesteps):
     currently_infectious, currently_sus, cur_reco = model.collect_report( ctx )
     report.write_timestep_report( csvwriter, 0, currently_infectious, currently_sus, cur_reco )
 
-    for timestep in range(1, num_timesteps + 1):
+    for timestep in tqdm(range(1, num_timesteps + 1)):
 
         # We almost certainly won't waste time updating everyone's ages every timestep but this is 
         # here as a placeholder for "what if we have to do simple math on all the rows?"
