@@ -3,16 +3,22 @@ import csv
 import numpy as np
 import concurrent.futures
 from functools import partial
+from icecream import ic
 import numba
 import pdb
 
-# import settings
+import settings
 import report
 
 # Globals! (not really)
 #base_infectivity = 0.000002
-#settings.base_infectivity = 0.00001
+# settings.base_infectivity = 0.00001
 # settings.base_infectivity = 0.0001
+
+def update_settings(new_settings):
+    for k,v in new_settings.__dict__.items():
+        setattr(settings, k, v)        
+    # pdb.set_trace()
 
 import ctypes
 # Load the shared library
@@ -104,7 +110,6 @@ def load( pop_file ):
 
 def initialize_database():
     print("Initializing database...")
-    print(settings)
     return load( settings.pop_file )
     
 def collect_report( data ):
@@ -247,7 +252,7 @@ def calculate_new_infections( data, inf, sus ):
                 new_infections
             )
         return new_infections 
-    #return calculate_new_infections_np( data, inf, sus )
+    # return calculate_new_infections_np( data, inf, sus )
     return calculate_new_infections_c( data, inf, sus )
 
 def handle_transmission_by_node( data, new_infections, node=0 ):
