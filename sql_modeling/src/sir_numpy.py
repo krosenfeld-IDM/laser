@@ -13,7 +13,7 @@ import report
 # Globals! (not really)
 #base_infectivity = 0.000002
 # settings.base_infectivity = 0.00001
-settings.base_infectivity = 0.0001
+# settings.base_infectivity = 0.0001
 
 def update_settings(new_settings):
     for k,v in new_settings.__dict__.items():
@@ -217,6 +217,7 @@ def progress_immunities( data ):
 
 def calculate_new_infections( data, inf, sus ):
     def calculate_new_infections_np( data, inf, sus ):
+        # pdb.set_trace()
         # We want to count the number of incubators by now all at once not in a for loop.
         node_counts_incubators = np.zeros(len(inf))
         node_counts_incubators = np.bincount( data['node'][data['incubation_timer']>=1] )
@@ -258,6 +259,22 @@ def calculate_new_infections( data, inf, sus ):
 def handle_transmission_by_node( data, new_infections, node=0 ):
     # Step 5: Update the infected flag for NEW infectees
     def handle_new_infections(new_infections):
+        # KR TEMP:
+        # # Create boolean mask for agents in the node
+        # subquery_condition = (data['node'] == node)
+
+        # # Get the indices of eligible agents using the boolean mask
+        # eligible_agents_indices = np.where(subquery_condition)[0]        
+
+        # # Draw infections
+        # selected_indices = np.random.choice(eligible_agents_indices, size=min(new_infections, len(eligible_agents_indices)), replace=False)
+        
+        # New boolean mask for those in the node who are not currently infected or immune
+        subquery_condition = np.logical_and(~data['infected'][selected_indices], ~data['immunity'][selected_indices])
+
+        # And downselect using this subquery condition
+        selected_indices = selected_indices[subquery_condition]
+
         # print( f"We are doing transmission to {new_infections} in node {node}." )
         # Create a boolean mask based on the conditions in the subquery
         subquery_condition = np.logical_and(~data['infected'], ~data['immunity'])
@@ -268,10 +285,10 @@ def handle_transmission_by_node( data, new_infections, node=0 ):
 
         # Randomly sample 'new_infections' number of indices
         selected_indices = np.random.choice(eligible_agents_indices, size=min(new_infections, len(eligible_agents_indices)), replace=False)
-
+        
         # Update the 'infected' column based on the selected indices
         data['infected'][selected_indices] = True
-        #data['incubation_timer'][selected_indices] = 2
+        # data['incubation_timer'][selected_indices] = 2
 
     def handle_new_infections_c(new_infections):
         update_ages_lib.handle_new_infections(
@@ -287,7 +304,7 @@ def handle_transmission_by_node( data, new_infections, node=0 ):
 
     #print( new_infections[node] )
     if new_infections[node]>0:
-        #handle_new_infections(new_infections[node])
+        # handle_new_infections(new_infections[node])
         handle_new_infections_c(new_infections[node])
         #handle_new_infections(new_infections)
 
