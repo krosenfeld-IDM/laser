@@ -5,4 +5,5 @@ sparklines
 numba
 tqdm
 icecream
+scipy
 
