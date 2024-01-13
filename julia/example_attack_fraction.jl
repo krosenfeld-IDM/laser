@@ -58,6 +58,7 @@ function main(model)
 
     xlabel!(p, "R0")
     ylabel!(p, "Attack fraction")
+    savefig("attack_fraction.png")
 end
 
 
