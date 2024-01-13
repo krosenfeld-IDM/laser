@@ -6,6 +6,7 @@ import pdb
 import numpy as np
 import polars as pl
 import matplotlib.pyplot as plt
+import scipy.optimize as spopt
 from tqdm import tqdm
 from icecream import ic
 import settings
@@ -59,15 +60,14 @@ def run_simulation(ctx, csvwriter, num_timesteps):
         report.write_timestep_report( csvwriter, timestep, currently_infectious, currently_sus, cur_reco )
 
     
-def run_km_sweep(num_samples:int=5):
+def run_km_sweep(num_samples:int=50):
     """
     Sweep over R0 values and calculate the total fraction infected
     """
 
     # mean infection period is 9 days (https://github.com/krosenfeld-IDM/laser/blob/e0310fcd47d1345f2d834b2dbfb589c17b0f13db/sql_modeling/src/sir_numpy.py#L302)
     mean_infection_period = 9
-    # R0s = np.linspace(0.5, 1.6, num=num_samples, endpoint=True)
-    R0s = [0]
+    R0s = np.linspace(0.5, 1.75, num=num_samples, endpoint=True)
     Zs = []
     for R0 in R0s:
 
@@ -93,9 +93,8 @@ def run_km_sweep(num_samples:int=5):
         # calculate the final fraction infected
         Zs.append(1 - df[-1,2] / settings.pop)
 
-
+    # write results to disk
     df = pl.DataFrame({'R0': R0s, 'Z': Zs})
-
     df.write_csv('km_sweep_results.csv')
 
     return 
@@ -105,14 +104,25 @@ def plot_km_sweep():
     """
     Plot results of run_km_sweep
     """
-
+    # read the results
     df = pl.read_csv('km_sweep_results.csv')
-
+    # plot the results
     plt.plot(df['R0'], df['Z'], 'o')
+    # add the KM analytic solution
+    # Reference trajectory (Kermack-McKendric analytic solution)
+    def KMlimt (x,R0):
+        return 1-x-np.exp(-x*R0)        
+    xref = np.linspace(1.01,2.0,200)
+    yref = np.zeros(xref.shape)
+    for k1 in range(yref.shape[0]):
+        yref[k1] = spopt.brentq(KMlimt, 1e-5, 1, args=(xref[k1]))  
+    plt.plot(np.concatenate((np.linspace(0.5,1.0,5), xref)),
+            np.concatenate((np.zeros(5),yref)),
+        '-',color='k', lw=5.0,label='Analytic Solution')              
     plt.xlabel('R0')
     plt.ylabel('Fraction infected')
-    plt.title('Fraction infected vs R0')
-    plt.ylim(0, 1)
+    plt.xlim( 0.5, 1.75 )
+    plt.ylim(-0.01, 0.81)
     plt.savefig('km_sweep_results.png')
 
     return
