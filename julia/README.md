@@ -5,7 +5,9 @@ Toy models using Julia. Right now the parameters and method are meant to follow 
 
 # Getting started
 
-Scripts are in the form `example_XXX.jl` and can be run:
+## Examples
+
+Example scripts are in the form `example_XXX.jl` and can be run:
 
 1. From the REPL:
 ```
@@ -20,6 +22,9 @@ Right now the models only take R0 and popsize as arguments. Everything else is h
 To use multiple threads you can call initialize julia with the `-threads N` flag:
 ``` julia --project=. --threads 4 example_sir.jl```
 
+## Benchmarks
+
+- `benchmark_num_agents.jl`: Benchmarking memory and runtime vs number of agents.
 
 # Installing Julia
 
