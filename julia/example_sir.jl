@@ -1,4 +1,5 @@
 # Basic SIR
+cd(@__DIR__)
 using CSV
 include("ToyModels.jl")
 import .Models

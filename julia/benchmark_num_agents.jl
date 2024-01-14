@@ -1,7 +1,7 @@
 """
 Capture time and memory usage as a function of the number of agents.
 """
-
+cd(@__DIR__)
 using Plots
 using BenchmarkTools
 include("ToyModels.jl")

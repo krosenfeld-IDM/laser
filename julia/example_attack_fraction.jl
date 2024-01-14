@@ -1,7 +1,7 @@
 """
 Attack fraction test
 """
-
+cd(@__DIR__)
 using Plots
 using DataFrames
 using CSV
