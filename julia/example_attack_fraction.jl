@@ -1,7 +1,9 @@
 """
 Attack fraction test
 """
+
 cd(@__DIR__)
+
 using Plots
 using DataFrames
 using CSV
@@ -22,9 +24,10 @@ end
 function generate_samples(model, num_samples::Int=100)
     Zs = zeros(num_samples)
     R0s = zeros(num_samples)
-    popsize = 100_000 # number of agents
+    num_agents = 100_000 # number of agents
+    # num_agents = 20_000
     for (i, r0) in enumerate(range(0.5, 1.75, length=num_samples))
-        df = model(popsize, r0)
+        df = model(num_agents, r0)
         Zs[i] = 1- df.S[end] / sum(df[1,:])
         R0s[i] = r0
     end
@@ -46,11 +49,11 @@ function main(model)
     end
 
     # make figure of data
-    p = plot(df.R0, df.Z, seriestype=:scatter, label="Simulation")
+    p = plot(df.R0, df.Z, seriestype=:scatter, label="Simulation", dpi=300)
 
     # add analytic solution
     KM = zeros(length(df.R0))
-    R0 = range(1.0, 2.0, length=50)
+    R0 = range(1.0, 1.75, length=50)
     for (i, R0) in enumerate(R0)
         KM[i] = find_zero(x -> KMlimit(x, R0), 0.5)
     end
