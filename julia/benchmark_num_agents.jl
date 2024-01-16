@@ -1,6 +1,7 @@
 """
 Capture time and memory usage as a function of the number of agents.
 """
+
 cd(@__DIR__)
 using Plots
 using BenchmarkTools
@@ -9,8 +10,8 @@ import .Models
 
 function run_benchmark()
     # number of agents (in log space)
-    ns = [2, 3, 4, 5, 6]
-    # ns = [2, 3]
+    ns = [2, 3, 4, 5, 6, 7]
+
     # list of the SIR and SEIR models contained in Model
     models = [Models.SIR, Models.SEIR]
 
