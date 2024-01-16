@@ -20,17 +20,24 @@ const ThreadRNG = Vector{Random.MersenneTwister}(undef, Threads.nthreads())
 function infectAgents(ids, susceptibility, timer, timer_mean, timer_std, ThreadRNG)
     for id in ids
         susceptibility[id] = 0
-        timer[id] = round(timer_std*randn(ThreadRNG[Threads.threadid()]) + timer_mean)
+        timer[id] = round(timer_std*randn(ThreadRNG[Threads.threadid()]) + timer_mean + 1)   # +1 because we decrement the timer at the end of each timestep
     end
 end
+
+# function infectAgents(ids, susceptibility, timer, timer_mean, timer_std, ThreadRNG)
+#     for id in ids
+#         susceptibility[id] = 0
+#         timer[id] = timer_mean
+#     end
+# end
 
 # Update a timer by decrementing it by 1
 function updateTimer(timer)
     Threads.@threads    for i in eachindex(timer)
-                        if timer[i] > 0
-                            timer[i] -= 1
+                            if timer[i] > 0
+                                timer[i] -= 1
+                            end
                         end
-    end
 end
 
 # Check if timer_a is start_timer (default=1), and if so, start timer_b
@@ -54,9 +61,9 @@ function SIR(num_agents::Int=10000, r0::Float64=2.5)
     # Hard-coded parameters
     ######################################
 
-    timesteps = 128
+    timesteps = 365
     inf_mean = 5
-    inf_std = 1
+    inf_std = 0.8
     init_infections = 10
 
     # derived values
@@ -72,10 +79,7 @@ function SIR(num_agents::Int=10000, r0::Float64=2.5)
 
     # initialize seed infections
     seed_infections = StatsBase.sample(1:num_agents, init_infections, replace=false)
-    for id in seed_infections
-        agent_susceptibility[id] = 0
-        agent_itimer[id] = round(inf_std*randn(ThreadRNG[Threads.threadid()]) + inf_mean)
-    end
+    infectAgents(seed_infections, agent_susceptibility, agent_itimer, inf_mean, inf_std, ThreadRNG)
 
     ######################################
     # Main execution loop
@@ -96,10 +100,10 @@ function SIR(num_agents::Int=10000, r0::Float64=2.5)
                                     infectAgents(i, agent_susceptibility, agent_itimer, inf_mean, inf_std, ThreadRNG)
                                 end
                             end
-
+        
         # update timers
         updateTimer(agent_itimer)
-        
+
     end
 
     # Package and return results
@@ -119,7 +123,7 @@ function SEIR(num_agents::Int=10000, r0::Float64=2.5)
     # Hard-coded parameters
     ######################################
 
-    timesteps = 128
+    timesteps = Int(180*3)
     inf_mean = 5
     inf_std = 1
     exp_mean = 3
