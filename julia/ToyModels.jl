@@ -2,7 +2,6 @@ module Models
 
 using Random
 using StatsBase
-using ProgressBars
 using DataFrames
 
 # Functions this module provides
@@ -20,7 +19,8 @@ const ThreadRNG = Vector{Random.MersenneTwister}(undef, Threads.nthreads())
 function infectAgents(ids, susceptibility, timer, timer_mean, timer_std, ThreadRNG)
     for id in ids
         susceptibility[id] = 0
-        timer[id] = round(timer_std*randn(ThreadRNG[Threads.threadid()]) + timer_mean + 1)   # +1 because we decrement the timer at the end of each timestep
+        timer[id] = timer_mean + 1   # +1 because we decrement the timer at the end of each timestep
+        # timer[id] = round(timer_std*randn(ThreadRNG[Threads.threadid()]) + timer_mean + 1)   # +1 because we decrement the timer at the end of each timestep
     end
 end
 
@@ -44,7 +44,8 @@ end
 function checkChainedTimer(timer_a, timer_b, timer_b_mean, timer_b_std, start_timer::Int=1)
     Threads.@threads    for i in eachindex(timer_a)
                             if timer_a[i] == start_timer
-                                timer_b[i] = round(timer_b_std*randn(ThreadRNG[Threads.threadid()]) + timer_b_mean)
+                                timer_b[i] = timer_b_mean
+                                # timer_b[i] = round(timer_b_std*randn(ThreadRNG[Threads.threadid()]) + timer_b_mean)
                             end
                         end
 end
@@ -55,13 +56,12 @@ end
 
 SIR model with infectious periods following a gaussian distribution. Transmission uses a force of infection approach.
 """
-function SIR(num_agents::Int=10000, r0::Float64=2.5)
+function SIR(num_agents::Int=10000, r0::Float64=2.5, num_timesteps=365)
 
     ######################################
     # Hard-coded parameters
     ######################################
 
-    timesteps = 365
     inf_mean = 5
     inf_std = 0.8
     init_infections = 10
@@ -84,8 +84,8 @@ function SIR(num_agents::Int=10000, r0::Float64=2.5)
     ######################################
     # Main execution loop
     ######################################
-    records = Array{Int64}(undef, (timesteps, 3)) # S, I, R
-    for t = ProgressBar(1:timesteps)
+    records = Array{Int64}(undef, (num_timesteps, 3)) # S, I, R
+    for t = 1:num_timesteps
 
         # record
         records[t,1] = count(x -> x == 1, agent_susceptibility) # S
@@ -117,13 +117,12 @@ end
     
 SEIR model with infectious and exposure (i.e., incubation) periods following a gaussian distribution. Transmission uses a force of infection approach.
 """
-function SEIR(num_agents::Int=10000, r0::Float64=2.5)
+function SEIR(num_agents::Int=10000, r0::Float64=2.5, num_timesteps=365)
 
     ######################################
     # Hard-coded parameters
     ######################################
 
-    timesteps = Int(180*3)
     inf_mean = 5
     inf_std = 1
     exp_mean = 3
@@ -149,8 +148,8 @@ function SEIR(num_agents::Int=10000, r0::Float64=2.5)
     ######################################
     # Main execution loop
     ######################################
-    records = Array{Int64}(undef, (timesteps, 4)) # S, E, I, R
-    for t = ProgressBar(1:timesteps)
+    records = Array{Int64}(undef, (num_timesteps, 4)) # S, E, I, R
+    for t = 1:num_timesteps
 
         # record
         records[t,1] = count(x -> x == 1, agent_susceptibility) # S
@@ -179,3 +178,4 @@ function SEIR(num_agents::Int=10000, r0::Float64=2.5)
 end
 
 end
+
