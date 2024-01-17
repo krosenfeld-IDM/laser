@@ -13,22 +13,38 @@ using Roots
 include("ToyModels.jl")
 import .Models
 
+include("MDModels.jl")
+import .ABM
 
 # analytic solution
 function KMlimit(x, R0)
     1 .- x .- exp(-x.*R0)
 end
 
+# there must be a more elegant solution for this...
+function run_abm(num_agents, R0, num_timesteps)
+    p = ABM.SEIRParameters(num_agents, R0, num_timesteps=num_timesteps)
+    agents = ABM.init_model(p)
+    Z = 1 - ABM.run_model!(agents, p) / num_agents
+    return Z
+end
+
+function run_model(num_agents, r0, num_timesteps)
+    df = model(num_agents, r0, num_timesteps)
+    return 1- df.S[end] / sum(df[1,:])    
+end
+
+####################################################
 
 # calculate attack fraction across a sweep of R0 values
 function generate_samples(model, num_samples::Int=100)
     Zs = zeros(num_samples)
     R0s = zeros(num_samples)
     num_agents = 100_000 # number of agents
-    # num_agents = 20_000
     for (i, r0) in enumerate(range(0.5, 1.75, length=num_samples))
-        df = model(num_agents, r0)
-        Zs[i] = 1- df.S[end] / sum(df[1,:])
+        # df = model(num_agents, r0, 2*365)
+        # Zs[i] = 1- df.S[end] / sum(df[1,:])        
+        Zs[i]  = run_abm(num_agents, r0, 2*365)
         R0s[i] = r0
     end
     return (Zs, R0s)
