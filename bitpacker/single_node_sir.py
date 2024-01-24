@@ -1,5 +1,5 @@
 """
-Bit packing. Each agent is represented by 32 bits. This example uses 22 bits.
+Bit packing. Each agent is represented by 32 bits. This example uses 22 bits per agent.
 """
 
 import numpy as np
@@ -60,6 +60,7 @@ if __name__ == '__main__':
     agents[seeds] = set_bits(agents[seeds],  States.I.value, *bm['state'])
     print('Number of agents infected:', np.sum(check_bits(agents, *bm['state'], States.I.value)))
 
+    # helpful function to count the number of agents in a given state
     count = lambda state: np.sum(check_bits(agents, *bm['state'], state))
 
     # main loop
