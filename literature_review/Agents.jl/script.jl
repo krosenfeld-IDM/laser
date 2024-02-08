@@ -43,7 +43,7 @@ function initialize(β::AbstractFloat, σ::AbstractFloat,  γ::AbstractFloat;
         β = β,
         γ = γ,
         σ = σ,
-        migration_rate = 1
+        migration_rate = 0.001
     )
 
     # Initialize the model
@@ -58,7 +58,8 @@ function initialize(β::AbstractFloat, σ::AbstractFloat,  γ::AbstractFloat;
     end
 
     # add initial outbreak
-    outbreak_node = rand(1:nv(space.graph))
+    # outbreak_node = rand(1:nv(space.graph))
+    outbreak_node = 1
     inds = ids_in_position(outbreak_node, model)
     for n in 1:initial_infections
         agent = model[rand(inds)]
@@ -119,23 +120,42 @@ function update!(agent, model)
     end
     return
 end
+
 ##########################################
 
+# Initialize
 model = initialize(β, σ, γ; num_agents=10^4)
 
+# Data collection
 susceptible(x) = count(i == :S for i in x)
 exposed(x) = count(i == :E for i in x)
 infectious(x) = count(i == :I for i in x)
 recovered(x) = count(i == :R for i in x)
 to_collect = [(:status, f) for f in (susceptible, exposed, infectious, recovered)]
 to_collect = [to_collect; [(:status, f, (a) -> a.pos == node) for node in 1:nv(model.space.graph) for f in (susceptible, exposed, infectious, recovered)]]
+
+# Run
 @time data, _ = run!(model, agent_step!, 100; adata=to_collect)
 
-# Plot total number in state
-fig = Figure()
-ax = Axis(fig[1,1])
+# Plot
+# 1: total number in each state
+fig1 = Figure()
+ax = Axis(fig1[1,1])
 lines!(ax, data.step, data.susceptible_status)
 lines!(ax, data.step, data.exposed_status)
 lines!(ax, data.step, data.infectious_status)
 lines!(ax, data.step, data.recovered_status)
-fig
+fig1
+
+# 2: Plot in the grid
+ioff = 4 + 1
+fig2 = Figure()
+for i in 1:5
+    for j in 1:5
+        ax = Axis(fig2[i,j])
+        for k in 1:4
+            lines!(ax, data.step, data[:, ioff + (i-1)*(j-1)*4 + k])
+        end
+    end
+end
+fig2
