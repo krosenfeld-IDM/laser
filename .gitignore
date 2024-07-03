@@ -84,3 +84,7 @@ proto/*.xlsx
 proto/*.csv
 proto/*.prof
 proto/*.txt
+
+# ignore environment
+env/
+venv/
