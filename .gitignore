@@ -88,3 +88,6 @@ proto/*.txt
 # ignore environment
 env/
 venv/
+
+# ignore jb/
+jb/
