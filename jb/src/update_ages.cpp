@@ -22,6 +22,21 @@ unsigned recovered_counter = 0;
 
 extern "C" {
 
+double random_double() {
+    return (double) rand() / RAND_MAX;
+}
+
+// Function to generate a binomial random variable
+int binomial(int n, double p) {
+    int successes = 0;
+    for (int i = 0; i < n; ++i) {
+        if (random_double() < p) {
+            successes++;
+        }
+    }
+    return successes;
+}
+
 /**
  * Update ages of individuals within a specified range by incrementing ages for non-negative values.
  *
@@ -208,7 +223,8 @@ void calculate_new_infections(
         }
         float infectious_count = infected_counts[ i ] - exposed_counts_by_bin[ i ];
         float foi = infectious_count * base_inf;
-        new_infs_out[ i ] = (int)round( foi * susceptible_counts[ i ] / totals[i] );
+        new_infs_out[ i] = (int) binomial( susceptible_counts[ i ], foi / totals[i] );
+        // new_infs_out[ i ] = (int)round( foi * susceptible_counts[ i ] / totals[i] );
         //printf( "DEBUG: new infs[node=%d] = infected_counts(%d) * base_inf(%f) * susceptible_counts(%d) / pop(%d) = %d.\n",
                //i, infected_counts[i], base_inf, susceptible_counts[i], totals[i], new_infs_out[i] );
     }
@@ -547,20 +563,7 @@ void reconstitute(
     abort();
 }
 
-double random_double() {
-    return (double) rand() / RAND_MAX;
-}
 
-// Function to generate a binomial random variable
-int binomial(int n, double p) {
-    int successes = 0;
-    for (int i = 0; i < n; ++i) {
-        if (random_double() < p) {
-            successes++;
-        }
-    }
-    return successes;
-}
 
 /*
  * Need access to the eula map/dict. Probably should pass in the sorted values as an array
