@@ -6,7 +6,6 @@ import pdb
 
 # Import a model
 import sir_numpy_c as model
-# import sir_numpy as model
 
 import numpy as np
 
