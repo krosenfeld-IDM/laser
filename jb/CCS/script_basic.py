@@ -73,11 +73,7 @@ def plot_si_orbitals(
     plt.grid(True)
     plt.savefig('SI_orbitals.png')
 
-if __name__ == "__main__":
-
-    # set the current working directory to the parent of this file
-    import os
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+def run():
 
     # read in the pop, initialize EULA, and adjust memory footprint
     ctx = model.initialize_database() # should really be called "load model"
@@ -86,6 +82,10 @@ if __name__ == "__main__":
     csv_writer = report.init()
     # run the simulation
     run_simulation( ctx=ctx, csvwriter=csv_writer, num_timesteps=settings.duration )
+
+if __name__ == "__main__":
+
+    run()
 
     plot_sir_curves()
 
