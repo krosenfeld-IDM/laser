@@ -18,7 +18,7 @@ from idmlaser.utils import NumpyJSONEncoder
 from .model import DiseaseModel
 
 _STATES_TYPE_NP = np.uint8  # S=0, E=1, I=2, R=3, ACTIVE=0x80, DECEASED=0x40
-# _STATES_TYPE_NB = nb.uint8    # not used, yet
+_STATES_TYPE_NB = nb.uint8    # used
 STATE_ACTIVE = np.uint8(0x80)  # bit flag for active state
 STATE_SUSCEPTIBLE = STATE_ACTIVE | np.uint8(0)
 STATE_EXPOSED = STATE_ACTIVE | np.uint8(1)
@@ -269,7 +269,28 @@ def vital_dynamics(model: NumbaSpatialSEIR, tick: int) -> None:
     doy = tick % 365 + 1  # day of year, 1-based
 
     # Deactivate deaths_t randomly selected individuals
-    # deaths = sum(node.deaths[tick] for node in model.nodes)
+    # # deaths = sum(node.deaths[tick] for node in model.nodes)
+    annual_deaths = model._demographics.deaths[year]
+    todays_deaths = (annual_deaths * doy // 365) - (annual_deaths * (doy - 1) // 365)
+    if (total_deaths := todays_deaths.sum()) > 0:
+        for nodeid, deaths in enumerate(todays_deaths):
+            if deaths == 0:
+                continue
+            else:
+                # CHECK
+                # continue
+                death_indices = model.prng.choice(np.argwhere(population.nodeid[: population.count] == nodeid), deaths, replace=False)
+                # # deaths = model.prng.choice(population.count, total_deaths, replace=False)
+                # population.states[death_indices] = STATE_DECEASED
+                # population.susceptibility[death_indices] = 0
+                # population.etimer[death_indices] = 0
+                # population.itimer[death_indices] = 0
+                for i in death_indices:
+                    population.states[i] = STATE_DECEASED
+                    population.susceptibility[i] = 0
+                    population.etimer[i] = 0
+                    population.itimer[i] = 0
+
 
     # Activate births_t new individuals as susceptible
     annual_births = model._demographics.births[year]
@@ -392,12 +413,12 @@ def transmission_update(model, tick) -> None:
 
 
 @nb.njit(
-    (_SUSCEPTIBILITY_TYPE_NB[:], _ITIMER_TYPE_NB[:], _ITIMER_TYPE_NB[:], _NODEID_TYPE_NB[:], nb.uint32[:, :], nb.uint32[:, :]),
+    (_STATES_TYPE_NB[:], _SUSCEPTIBILITY_TYPE_NB[:], _ITIMER_TYPE_NB[:], _ITIMER_TYPE_NB[:], _NODEID_TYPE_NB[:], nb.uint32[:, :], nb.uint32[:, :]),
     parallel=True,
     nogil=True,
     cache=True,
 )
-def report_parallel(susceptibilities, etimers, itimers, nodeids, results, scratch):
+def report_parallel(states, susceptibilities, etimers, itimers, nodeids, results, scratch):
     # results indexed by state (SEIR) and node
     # scratch indexed by thread and node
 
@@ -437,7 +458,7 @@ def report_parallel(susceptibilities, etimers, itimers, nodeids, results, scratc
         start = c * per_thread
         end = min((c + 1) * per_thread, num_agents)
         for i in range(start, end):
-            if (susceptibilities[i] == 0.0) & (etimers[i] == 0) & (itimers[i] == 0):
+            if (states[i] != STATE_DECEASED) & (susceptibilities[i] == 0.0) & (etimers[i] == 0) & (itimers[i] == 0):
                 scratch[c, nodeids[i]] += 1
     results[3] = scratch.sum(axis=0)
 
@@ -468,6 +489,7 @@ def report_update(model: NumbaSpatialSEIR, tick: int) -> None:
     if _scratch is None:
         _scratch = np.zeros((nb.get_num_threads(), model._demographics.nnodes), dtype=np.uint32)
     report_parallel(
+        population.states[: population.count],
         population.susceptibility[: population.count],
         population.etimer[: population.count],
         population.itimer[: population.count],
