@@ -15,8 +15,8 @@ def get_params():
 
     # set the model parameters
     meta_params = PropertySet()
-    meta_params.ticks = 365 * 20
-    meta_params.nodes = 0 # all nodes
+    meta_params.ticks = 365 * 3
+    meta_params.nodes = 3 # 0 is all nodes
     meta_params.seed = 20240612
     meta_params.output = Path(__file__).parent / "outputs" # this seems dangerous...
 
@@ -62,23 +62,40 @@ def run(params):
 
     model.run(params.ticks)
 
-    paramfile, npyfile = model.finalize()
+    # paramfile, npyfile = model.finalize()
 
     return model
 
 def make_fig(params):
-    channels = np.load(params.output / "20240705-225923-engwal-954-7300-spatial_seir.npy")
-    
+    # channels = np.load(params.output / "20240705-225923-engwal-954-7300-spatial_seir.npy")
+    channels = np.load(params.output / "20240708-205224-engwal-3-1095-spatial_seir.npy")
+    max_node = np.argmax(channels[0,0,:])
     plt.figure()
-    plt.plot(channels.sum(axis=-1)[:,2])
+    plt.plot(channels[:,2,max_node], color='r', label='Infectious')
+    plt.ylim(0, None)
+    plt.ylabel('Infectious')
+    # plt.plot(channels.sum(axis=-1)[:,2], color='r', label='Infectious')
+    # add a second axis
+    ax2 = plt.gca().twinx()
+    ax2.plot(channels[:,0,max_node], color='b', label='Susceptible')
+    ax2.set_ylim(0, None)
+    ax2.set_ylabel('Susceptible')
+    plt.tight_layout()
     plt.savefig(params.output / "channel.png")
+
+    plt.figure()
+    plt.plot(np.sum(channels, axis=(1,2)))
+    print(f"final poulation: {np.sum(channels[-1])}")
+    plt.ylabel('Population')
+    plt.savefig(params.output / "population.png")
 
 
 if __name__ == "__main__":
 
     params = get_params()
 
-    # model = run(params)
+    model = run(params)
+    print("POPULATION COUNT:", model.population.count)
 
     make_fig(params)
 
