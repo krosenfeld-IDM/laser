@@ -33,7 +33,9 @@ void initialize_generator() {
 }
 
 double random_double() {
-    return (double) rand() / RAND_MAX;
+    initialize_generator();
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    return dist(generator);
 }
 
 // Function to generate a binomial random variable
@@ -41,13 +43,6 @@ int binomial(int n, double p) {
     initialize_generator();
     std::binomial_distribution<> dist(n, p);  // Binomial distribution
     return dist(generator);
-    // int successes = 0;
-    // for (int i = 0; i < n; ++i) {
-    //     if (random_double() < p) {
-    //         successes++;
-    //     }
-    // }
-    // return successes;
 }
 
 /**

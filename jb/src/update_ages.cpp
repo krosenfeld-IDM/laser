@@ -16,25 +16,33 @@
 #include <pthread.h>
 #include <omp.h>
 #include <immintrin.h>
+#include <random>
 
 #define SIMD_WIDTH 8     // AVX2 processes 8 integers at a time
 unsigned recovered_counter = 0;
+static std::mt19937 generator;
+static bool generator_initialized = false;
 
 extern "C" {
 
+void initialize_generator() {
+    if (!generator_initialized) {
+        generator.seed(static_cast<unsigned long>(time(nullptr)));
+        generator_initialized = true;
+    }
+}
+
 double random_double() {
-    return (double) rand() / RAND_MAX;
+    initialize_generator();
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    return dist(generator);
 }
 
 // Function to generate a binomial random variable
 int binomial(int n, double p) {
-    int successes = 0;
-    for (int i = 0; i < n; ++i) {
-        if (random_double() < p) {
-            successes++;
-        }
-    }
-    return successes;
+    initialize_generator();
+    std::binomial_distribution<> dist(n, p);  // Binomial distribution
+    return dist(generator);
 }
 
 /**
