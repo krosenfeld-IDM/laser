@@ -225,6 +225,11 @@ def load( pop_file ):
     global attraction_probs 
     if demographics_settings.num_nodes > 1 and settings.migration_fraction > 0:
         attraction_probs = load_attraction_probs()
+    print("Attraction probs loaded.", attraction_probs.shape)
+
+    # is mig_params in the settings module
+    if hasattr(settings, 'migration_params'):
+        print( "Migration parameters found in settings." )
     return data
 
 def initialize_database():

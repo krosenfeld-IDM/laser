@@ -18,7 +18,8 @@ campaign_day=6000000
 campaign_coverage=0.75
 
 campaign_node=15
-migration_fraction=0.043 # 0.01 # 0.10 # # 0.013
+migration_fraction=  0.043 # 0.01 # 0.10 # # 0.013
+migration_params = [1,2]
 migration_interval=1
 mortality_interval=1 # 30
 fertility_interval=1 # 7
